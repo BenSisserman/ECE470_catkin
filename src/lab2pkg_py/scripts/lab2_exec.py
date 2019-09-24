@@ -198,17 +198,38 @@ def move_arm(pub_cmd, loop_rate, dest, vel, accel):
 
 def move_block(pub_cmd, loop_rate, start_loc, start_height, end_loc, end_height):
 	global Q
+	global suction
 	
-
-	move_arm(pub_cmd, loop_rate, Q[start_loc][start_height], 5, 4)
-	time.sleep(0.1)
-	gripper(pub_cmd, loop_rate, 1)
-
+	# start at home
 	move_arm(pub_cmd, loop_rate, home, 5, 2)
 
+	# move arm to block location
+	move_arm(pub_cmd, loop_rate, Q[start_loc][start_height], 5, 4)
+	time.sleep(0.1)
+
+	#turn gripper on
+	gripper(pub_cmd, loop_rate, 1)
+	time.sleep(0.2)
+
+	if(not suction):
+		gripper(pub_cmd, loop_rate, 0)
+		move_arm(pub_cmd, loop_rate, home, 5, 2)
+		print("No block at src.")
+		error = 1
+		return error
+	
+	# move home to avoid knocking over blocks
+	move_arm(pub_cmd, loop_rate, home, 5, 2)
+
+	# move to dest
 	move_arm(pub_cmd, loop_rate, Q[end_loc][end_height], 5, 4)
 	time.sleep(0.1)
+	
+	# turn gripper off
 	gripper(pub_cmd, loop_rate, 0)
+
+
+	# end at home
 	move_arm(pub_cmd, loop_rate, home, 5, 2)
 
 	error = 0
@@ -222,18 +243,32 @@ def towers_of_hanoi(pub_cmd, loop_rate, src, dest, other, count):
 
 	if(count == 1):
 		num_blocks[src] -= 1
-		move_block(pub_cmd, loop_rate, src, num_blocks[src], dest, num_blocks[dest])
+		err = move_block(pub_cmd, loop_rate, src, num_blocks[src], dest, num_blocks[dest])
+		if (err == 1):
+			return 1
+
 		num_blocks[dest] += 1
 		print(num_blocks)
-		return
+		return 0
 	else:
-		towers_of_hanoi(pub_cmd, loop_rate, src, other, dest, count-1)
+		err = towers_of_hanoi(pub_cmd, loop_rate, src, other, dest, count-1)
+		if(err == 1):
+			return 1
+
 		num_blocks[src] -= 1
-		move_block(pub_cmd, loop_rate, src, num_blocks[src], dest, num_blocks[dest])
+		err = move_block(pub_cmd, loop_rate, src, num_blocks[src], dest, num_blocks[dest])
+		if(err == 1):
+			return 1
+
 		num_blocks[dest] += 1
 		print(num_blocks)
-		towers_of_hanoi(pub_cmd, loop_rate, other, dest, src, count-1)
-		return
+		err = towers_of_hanoi(pub_cmd, loop_rate, other, dest, src, count-1)
+		if(err == 1):
+			return 1
+
+		return 0
+
+
 ############### Your Code End Here ###############
 
 
