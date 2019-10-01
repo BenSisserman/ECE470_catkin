@@ -209,7 +209,7 @@ def move_block(pub_cmd, loop_rate, start_loc, start_height, end_loc, end_height)
 
 	#turn gripper on
 	gripper(pub_cmd, loop_rate, 1)
-	time.sleep(0.2)
+	time.sleep(0.3)
 
 	if(not suction):
 		gripper(pub_cmd, loop_rate, 0)

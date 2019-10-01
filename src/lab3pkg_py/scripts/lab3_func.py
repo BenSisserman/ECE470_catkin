@@ -19,27 +19,26 @@ def blob_search_init():
 	
 
 	# Filter by Area.
-	params.filterByArea = False    
+	params.filterByArea = True
+	params.minArea = 90
+	params.maxArea = 250
 
 
 	# Filter by Circularity
 	params.filterByCircularity = True
-	params.minCircularity = 0.5
+	params.minCircularity = 0.3
 	params.maxCircularity = 1
-
 
 	# Filter by Inerita
 	params.filterByInertia = True
-	params.minInertiaRatio = 0.5
+	params.minInertiaRatio = 0.3
 
 	
 	# Filter by Convexity
-	params.filterByConvexity = False
+	params.filterByConvexity = True
+	params.minConvexity = 0.3
 	
 	
-
-
-	# Any other params to set???
 
 
 	################## Your Code End Here ##################
@@ -114,11 +113,20 @@ def blob_search(image, detector):
 	# Draw centers on each blob, append all the centers to blob_image_center as string in format "x y"
 
 	keypoints = detector.detect(crop_image)
-	im_with_keypoints = cv2.drawKeypoints(image, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+	kp_list = []
+
+	for i in range(len(keypoints)):
+		x = keypoints[i].pt[0] + crop_top_col
+		y = keypoints[i].pt[1] + crop_top_row
+		new_tuple = (x, y)
+		keypoints[i].pt = new_tuple
+		cv2.circle(image,(int(np.round(x)),int(np.round(y))), 1, (255, 255, 255), -1)
+		#print((int(np.round(x)),int(np.round(y))))
+		blob_image_center.append(str(int(np.round(x))) + " " + str(int(np.round(y))))
 	
-	for kp in keypoints:
-		print(kp.pt[0])
-		print(kp.pt[1])
+	im_with_keypoints = cv2.drawKeypoints(image, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+	
 
 	############################# Your Code End Here #############################
 
