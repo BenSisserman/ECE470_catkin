@@ -17,9 +17,9 @@ from lab3_func import blob_search_init, blob_search
 
 # Params for camera calibration
 theta = 0 
-beta = 0
-tx = 0
-ty = 0
+beta = 750.266619276
+tx = -0.2555
+ty = -0.1245
 
 #######################################################################################
 
@@ -45,7 +45,7 @@ class ImageConverter:
 		global beta
 		global tx
 		global ty
-
+        
 		try:
 		    # Convert ROS image to OpenCV image
 		    raw_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -61,28 +61,18 @@ class ImageConverter:
 		# cv_image is normal color image
 		blob_image_center = blob_search(cv_image, self.detector)
 
+		print(blob_image_center)
+
 		if(len(blob_image_center) == 0):
-			print("No blob found!")
+			#print("No blob found!")
 			self.coord_pub.publish("")
 		else:
-			x = int(blob_image_center[0].split()[0])
-			y = int(blob_image_center[0].split()[1])
-			# print("Blob found! ({0}, {1})".format(x, y))
-
-			################################ Your Code Start Here ################################
-
-			# Given theta, beta, tx, ty, calculate the world coordinate of x,y namely xw, yw  
-
-
-
-
-
-
-
-			################################# Your Code End Here ################################# 
-
+			x = int(blob_image_center[0].split()[1])
+			y = int(blob_image_center[0].split()[0])
+			xw = (x - 240)/beta - tx
+			yw = (y - 320)/beta - ty
 			xy_w = str(xw) + str(' ') + str(yw)
-			# print(xy_w)
+			print(xy_w)
 			self.coord_pub.publish(xy_w)
 
 

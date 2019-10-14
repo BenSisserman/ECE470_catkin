@@ -37,7 +37,8 @@ Callback function for getting current robot's world coordinate
 def coord_callback(msg):
 
 	global blob_center
-	blob_center = msg.data
+	if(msg.data):
+		blob_center = msg.data
 
 
 """
@@ -321,6 +322,7 @@ class Maze(object):
 		Check if the directions of a given cell are permissible.
 		Return: (down, right, up, left)
 		'''
+		print (cell)
 		cell_value = self.maze[cell[0], cell[1]] #(row number, col number)
 		return (cell_value & 1 == 0, cell_value & 2 == 0, cell_value & 4 == 0, cell_value & 8 == 0)
 
@@ -523,12 +525,12 @@ class default_2D_Model:
 
 		if cellX > 15:
 			cellX = 15
-        
+		
 		if cellY > 9:
 			cellY = 9			 
-        
+		
 		permissibilities = self.map.permissibilities((cellY, cellX))  #(down, right, up, left)
-        
+		
 		if (currentControl == 3 and permissibilities[2]):
 			y += self.grid_height
 		elif (currentControl == 1 and permissibilities[0]):
@@ -541,24 +543,24 @@ class default_2D_Model:
 		x += np.random.normal(0, self.motionNoise)
 		y += np.random.normal(0, self.motionNoise)
 		nextEstimate = np.array([x, y])
-        
+		
 		for i in range(2):
 			nextEstimate[i] = max(self.min[i], nextEstimate[i])
 			nextEstimate[i] = min(self.max[i], nextEstimate[i])
-        
+		
 		return nextEstimate
 
 
 	def run(self, currentControl=0): 
 
 		"""
-        Input: Control command: 0 halt, 1 down, 2 right, 3 up, 4 left
-        Can only move from the center of one cell to the center of one of four neighboring cells
-        """
+		Input: Control command: 0 halt, 1 down, 2 right, 3 up, 4 left
+		Can only move from the center of one cell to the center of one of four neighboring cells
+		"""
 
 		global canmove
 		global blob_center
-     
+	 
 		cellX, cellY = int(self.x // self.grid_width), int(self.y // self.grid_height)
 		permissibilities = self.map.permissibilities((cellY, cellX))  
 
@@ -576,42 +578,42 @@ class default_2D_Model:
 			canmove = 1
 		else: 
 			canmove = 0
-		    
+			
 		self.map.show_robot_position(self.x, self.y, 0)
 
-	    
+		
 	def plotParticles(self, particles):
 		"""
-        Input is 2D python list containing position of all particles: [[x1,y1], [x2,y2], ...]
-        """
+		Input is 2D python list containing position of all particles: [[x1,y1], [x2,y2], ...]
+		"""
 		self.map.show_valid_particles(particles)
 
 
 	def plotEstimation(self, estimatePosition):
 		"""
-        Input is the estimated position: [x, y]
-        """
+		Input is the estimated position: [x, y]
+		"""
 		self.map.show_estimated_location(estimatePosition)
 
 
 	def readMax(self):
 		"""
-        Return the max value at each dimension [maxX, maxY, ...]
-        """
+		Return the max value at each dimension [maxX, maxY, ...]
+		"""
 		return self.max
 
 
 	def readMin(self):
 		"""
-        Return the min value at each dimension [minX, minY, ...]
-        """
+		Return the min value at each dimension [minX, minY, ...]
+		"""
 		return self.min
 
 
 	def readPosition(self):
 		"""
-        Return actual position, can be used for debug
-        """
+		Return actual position, can be used for debug
+		"""
 		return (self.x, self.y)
 
 
@@ -630,28 +632,32 @@ class particleFilter:
 		self.curMin = self.model.readMin()  
 		self.resNoise = [x*resamplingNoise for x in self.curMax] 
 
-        ############# The initial particles are uniformely distributed #############
-        ## TODO: self.particles = ? self.weights = ?
-        
-        # Generate uniformly distributed variables in x and y direction within [0, 1]
-        # Hint: np.random.uniform(0, 1, ...) 
-        
-        # Spread these generated particles on the maze
-        # Hint: use self.curMax, remember X direction: self.curMax[0], Y direction: self.curMax[1]
-        # particles should be something like [[x1,y1], [x2,y2], ...]
-        
-        # Generate weight, initially all the weights for particle should be equal, namely 1/num_of_particles
-        # weights should be something like [1/num_of_particles, 1/num_of_particles, 1/num_of_particles, ...]
-        
-        ###################################################################
-        # Student finish the code below
+		############# The initial particles are uniformely distributed #############
+		## TODO: self.particles = ? self.weights = ?
+		
+		# Generate uniformly distributed variables in x and y direction within [0, 1]
+		# Hint: np.random.uniform(0, 1, ...) 
+		
+		# Spread these generated particles on the maze
+		# Hint: use self.curMax, remember X direction: self.curMax[0], Y direction: self.curMax[1]
+		# particles should be something like [[x1,y1], [x2,y2], ...]
+		
+		# Generate weight, initially all the weights for particle should be equal, namely 1/num_of_particles
+		# weights should be something like [1/num_of_particles, 1/num_of_particles, 1/num_of_particles, ...]
+		
+		###################################################################
+		# Student finish the code below
 
 
-
-
-
-
-
+		self.particles = []
+		self.weights = []
+		for i in range(self.numParticles):
+			x = np.random.uniform(0,1)
+			y = np.random.uniform(0,1)
+			x = x*self.curMax[0]
+			y = y*self.curMax[1]
+			self.particles.append(np.array([x,y]))
+			self.weights.append(1/self.numParticles)
 
 
 
@@ -660,23 +666,18 @@ class particleFilter:
 
 	def Sample_Motion_Model(self, u_t=0):
 
-        ####### Sample the Motion Model to Propagate the Particles ########
-        ## TODO: self.particles = ?
-        
-        # For each particle in self.particles [[x1,y1], [x2,y2], ...], get the nextEstimate
-        # Hint: use self.model.simulateNextPosition(?, u_t)
-        # Update self.particles
-        
-        ###################################################################
-         # Student finish the code below
-
-
-
-
-
-
-
-
+		####### Sample the Motion Model to Propagate the Particles ########
+		## TODO: self.particles = ?
+		
+		# For each particle in self.particles [[x1,y1], [x2,y2], ...], get the nextEstimate
+		# Hint: use self.model.simulateNextPosition(?, u_t)
+		# Update self.particles
+		
+		###################################################################
+		 # Student finish the code below
+		for i in range(self.numParticles):
+			nextEstimate = self.model.simulateNextPosition(self.particles[i], u_t)
+			self.particles[i] = nextEstimate
 
 		####################################################################
 
@@ -684,71 +685,83 @@ class particleFilter:
 	def Measurement_Model(self, x, y):
 
 		##################### Measurement Motion Model #####################
-        ## TODO: update self.weights, normalized
-        
-        # Get the sensor measurements for robot's position
-        # Hint: use self.model.readingSensor(x_camera,y_camera)
-        
-        # For each particle in self.particles [[x1,y1], [x2,y2], ...], get the its position
-        # Hint: use self.model.readingMap(position)
-        
-        # Calculate distance between robot's postion and each particle's position
-        # Calculate weight for each particle, w_t = exp(-distance**2/(2*self.std))
-        
-        # Collect all the particles' weights in a list
-        # For all the weights of particles, normalized them
-        # Hint: pay attention to the case that sum(weights)=0, avoid round-off to zero
-        
-        # Update self.weights
-        
-        ####################################################################
-        # Student finish the code below
+		## TODO: update self.weights, normalized
+		
+		# Get the sensor measurements for robot's position
+		# Hint: use self.model.readingSensor(x_camera,y_camera)
+		
+		# For each particle in self.particles [[x1,y1], [x2,y2], ...], get the its position
+		# Hint: use self.model.readingMap(position)
+		
+		# Calculate distance between robot's postion and each particle's position
+		# Calculate weight for each particle, w_t = exp(-distance**2/(2*self.std))
+		
+		# Collect all the particles' weights in a list
+		# For all the weights of particles, normalized them
+		# Hint: pay attention to the case that sum(weights)=0, avoid round-off to zero
+		
+		# Update self.weights
+		
+		####################################################################
+		# Student finish the code below
+
+		robotMeasure = self.model.readingSensor(xCAM,yCAM)
+		newWeights = []
+		for i in range(self.numParticles):
+			particleMeasure = self.model.readingMap(self.particles[i])
+			
+			distance = 0
+			for i in range(4):
+				distance += (robotMeasure[i] - particleMeasure[i])**2
+				
+			distance = np.sqrt(distance)    
+			particleWeight = np.exp(-distance**2/(2*self.std))
+			newWeights.append(particleWeight)
+
+		weightSum = sum(newWeights)
+		
+		if(sum(newWeights) == 0):
+			print("sum of wieghts is zero")
+			
+		for i in range(self.numParticles):
+			newWeights[i] = (1/weightSum)*newWeights[i]
+			
+		self.weights = newWeights
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        ####################################################################
+		####################################################################
 
 
 
 	def calcPosition(self):
 
 		############# Calculate the position update estimate ###############
-        ## TODO: return a list with two elements [x,y],  estimatePosition
-        
-        # For all the particles in direction x and y, get one estimated x, and one estimated y
-        # Hint: use the normalized weights, self.weights, estimated x, y can not be out of the
-        # boundary, use self.curMin, self.curMax to check
+		## TODO: return a list with two elements [x,y],  estimatePosition
+		
+		# For all the particles in direction x and y, get one estimated x, and one estimated y
+		# Hint: use the normalized weights, self.weights, estimated x, y can not be out of the
+		# boundary, use self.curMin, self.curMax to check
 
-        ####################################################################
-        # Student finish teh code below
+		####################################################################
+		# Student finish teh code below
+
+		x = 0
+		y = 0
+		
+		for i in range(self.numParticles):
+			x += self.particles[i][0]*self.weights[i]
+			y += self.particles[i][1]*self.weights[i]
+		
+		if(x < self.curMin[0] or x > self.curMax[0]):
+			print("x is out of range.")
+			
+		if( y < self.curMin[1] or y > self.curMax[1]):
+			print("y is out of range.")
+		estimatePosition = np.array([x,y])
+		return estimatePosition
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-        ####################################################################
+		####################################################################
 
 
 
@@ -762,8 +775,16 @@ class particleFilter:
 		cumulative_sum = np.cumsum(self.weights)
 		cumulative_sum[-1] = 1. # avoid round-off error
 
-        # Resample according to indexes
-        # The probability to be selected is related to weight
+		"""
+        create new empty list for particles
+        get number of particles
+        get an array with the cummalative summation of wieghts and make sure the final sum is 1
+        
+        for every weight, draw a random number, find the weight that it falls on,
+        and add that weight to the new set.
+
+        update self.particles to new set.
+        """
 		for i in range(N):
 			randomProb = np.random.uniform()
 			index = np.searchsorted(cumulative_sum, randomProb)
@@ -771,7 +792,24 @@ class particleFilter:
 
 		self.particles = newParticles 
 
-
+		""" 
+		initialize new list of particles
+		get number of particles N
+		randomly draw an index from 0 to N
+		get the maximum weight
+		
+		for N times, get a random value beta from 0 to twice the max weight
+			while beta is larger than the randomized index, decrement beta,
+				and get a new index
+				
+			if the current indexed weight is greater than beta, add
+			the particle to the new set
+			
+		this is essentially a randomized selection where the larger values
+		are more likely to succeed.
+   
+		"""
+		
 #     # Method 2: Roulette Wheel
 #     def resampling(self):
 #         newParticles = []
@@ -795,7 +833,7 @@ def blob_center_trans(blob_center_str):
 	"""
 	global gridzero_inRobotWorld_x
 	global gridzero_inRobotWorld_y
-
+	
 	if(len(blob_center_str) == 0):
 		x = -1
 		y = -1
@@ -829,6 +867,7 @@ def looprun(partfilt,step_sz,cmd,rate):
 		partfilt.Sample_Motion_Model(control)   
 	else:
 		time.sleep(0.2)
+		print (blob_center)
 		(xCAM, yCAM) = blob_center_trans(blob_center)
 
 
@@ -879,7 +918,7 @@ def looprun(partfilt,step_sz,cmd,rate):
 
 
 	partfilt.model.map.clear_objects()
-	            
+				
 	partfilt.model.run(control)		
 
 	print('Actual Postions: ' + str(partfilt.model.readPosition))	
@@ -954,6 +993,6 @@ if __name__ == '__main__':
 	
 	try:
 		main()
-    # When Ctrl+C is executed, it catches the exception
+	# When Ctrl+C is executed, it catches the exception
 	except rospy.ROSInterruptException:
 		pass
