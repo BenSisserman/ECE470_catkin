@@ -775,8 +775,21 @@ class particleFilter:
 		cumulative_sum = np.cumsum(self.weights)
 		cumulative_sum[-1] = 1. # avoid round-off error
 
+<<<<<<< HEAD
 		# Resample according to indexes
 		# The probability to be selected is related to weight
+=======
+		"""
+        create new empty list for particles
+        get number of particles
+        get an array with the cummalative summation of wieghts and make sure the final sum is 1
+        
+        for every weight, draw a random number, find the weight that it falls on,
+        and add that weight to the new set.
+
+        update self.particles to new set.
+        """
+>>>>>>> 25fe3324e377e76de9ca7b35f450c97b8af4645a
 		for i in range(N):
 			randomProb = np.random.uniform()
 			index = np.searchsorted(cumulative_sum, randomProb)
@@ -784,7 +797,24 @@ class particleFilter:
 
 		self.particles = newParticles 
 
-
+		""" 
+		initialize new list of particles
+		get number of particles N
+		randomly draw an index from 0 to N
+		get the maximum weight
+		
+		for N times, get a random value beta from 0 to twice the max weight
+			while beta is larger than the randomized index, decrement beta,
+				and get a new index
+				
+			if the current indexed weight is greater than beta, add
+			the particle to the new set
+			
+		this is essentially a randomized selection where the larger values
+		are more likely to succeed.
+   
+		"""
+		
 #     # Method 2: Roulette Wheel
 #     def resampling(self):
 #         newParticles = []
@@ -808,8 +838,13 @@ def blob_center_trans(blob_center_str):
 	"""
 	global gridzero_inRobotWorld_x
 	global gridzero_inRobotWorld_y
+<<<<<<< HEAD
 
 	elif(len(blob_center_str) == 0):
+=======
+	
+	if(len(blob_center_str) == 0):
+>>>>>>> 25fe3324e377e76de9ca7b35f450c97b8af4645a
 		x = -1
 		y = -1
 	else:

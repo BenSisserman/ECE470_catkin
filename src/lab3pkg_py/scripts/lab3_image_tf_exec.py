@@ -61,18 +61,24 @@ class ImageConverter:
         # Only two blob center are found on the image
         if(len(blob_image_center) == 2):
 
-            x1 = int(blob_image_center[0].split()[0])
-            y1 = int(blob_image_center[0].split()[1])
-            x2 = int(blob_image_center[1].split()[0])
-            y2 = int(blob_image_center[1].split()[1])
+            x1 = int(blob_image_center[0].split()[1])
+            y1 = int(blob_image_center[0].split()[0])
+            x2 = int(blob_image_center[1].split()[1])
+            y2 = int(blob_image_center[1].split()[0])
 
             print("Blob Center 1: ({0}, {1}) and Blob Center 2: ({2}, {3})".format(x1, y1, x2, y2))           
             Or = 480/2 
             Oc = 640/2
             beta = np.sqrt((x2 - x1)**2 + (y2-y1)**2)/0.1
-            tx = -xw + (x2 - Or)/beta
-            ty = -yw + (y2 - Oc)/beta
+            
+            if(y1 < y2):
+                tx = -xw + (x1 - Or)/beta
+                ty = -yw + (y1 - Oc)/beta
 
+            elif(y2 < y1):
+                tx = -xw + (x2 - Or)/beta
+                ty = -yw + (y2 - Oc)/beta
+                
             ################################## Your Code End Here ################################## 
 
             print("theta = {0}\nbeta = {1}\ntx = {2}\nty = {3}\n".format(theta, beta, tx, ty))

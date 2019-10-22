@@ -18,8 +18,10 @@ from lab3_func import blob_search_init, blob_search
 # Params for camera calibration
 theta = 0 
 beta = 750.266619276
+
 tx = -0.103716216216
 ty = -0.177833333333
+
 
 #######################################################################################
 
@@ -67,10 +69,12 @@ class ImageConverter:
 			#print("No blob found!")
 			self.coord_pub.publish("")
 		else:
-			x = int(blob_image_center[0].split()[0])
-			y = int(blob_image_center[0].split()[1])
+
+			x = int(blob_image_center[0].split()[1])
+			y = int(blob_image_center[0].split()[0])
 			xw = (x - 240)/beta - tx
-			yw = (y - 320)/beta - ty           
+			yw = (y - 320)/beta - ty
+
 			xy_w = str(xw) + str(' ') + str(yw)
 			print(xy_w)
 			self.coord_pub.publish(xy_w)
