@@ -67,8 +67,8 @@ class ImageConverter:
             y2 = int(blob_image_center[1].split()[1])
 
             print("Blob Center 1: ({0}, {1}) and Blob Center 2: ({2}, {3})".format(x1, y1, x2, y2))           
-            Or = 640/2 
-            Oc = 480/2
+            Or = 480/2 
+            Oc = 640/2
             beta = np.sqrt((x2 - x1)**2 + (y2-y1)**2)/0.1
             tx = -xw + (x2 - Or)/beta
             ty = -yw + (y2 - Oc)/beta

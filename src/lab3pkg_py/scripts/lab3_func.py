@@ -20,23 +20,23 @@ def blob_search_init():
 
 	# Filter by Area.
 	params.filterByArea = True
-	params.minArea = 90
-	params.maxArea = 250
+	params.minArea = 100
+	params.maxArea = 500
 
 
 	# Filter by Circularity
 	params.filterByCircularity = True
-	params.minCircularity = 0.3
+	params.minCircularity = 0.15
 	params.maxCircularity = 1
 
 	# Filter by Inerita
 	params.filterByInertia = True
-	params.minInertiaRatio = 0.3
+	params.minInertiaRatio = 0.15
 
 	
 	# Filter by Convexity
 	params.filterByConvexity = True
-	params.minConvexity = 0.3
+	params.minConvexity = 0.15
 	
 	
 
@@ -119,6 +119,7 @@ def blob_search(image, detector):
 		x = keypoints[i].pt[0] + crop_top_col
 		y = keypoints[i].pt[1] + crop_top_row
 		new_tuple = (x, y)
+		print(new_tuple)
 		keypoints[i].pt = new_tuple
 		cv2.circle(image,(int(np.round(x)),int(np.round(y))), 1, (255, 255, 255), -1)
 		#print((int(np.round(x)),int(np.round(y))))
