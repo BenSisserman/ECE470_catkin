@@ -59,6 +59,25 @@ def Get_MS():
 	# ==============================================================#
 	return M, S
 
+	'''
+	alpha = np.arccos((-c*c + l03*l03 + l05*l05)/(2*l03*l05))
+	beta =  np.arcsin(l05 / c * np.sin(alpha))
+	gamma = np.arcsin((z3end - l01) / c )
+	etta = PI - alpha - beta
+	delta = PI/2 - alpha 
+
+
+	thetas[1]= -(beta + gamma)     				# Default value Need to Change
+	thetas[2]= PI - alpha      					# Default value Need to Change
+	#thetas[3]= -(etta + delta) + (0.5*PI) 		# Default value Need to Change, need + (0.5*PI) for compensation
+	r = PI - thetas[2]
+	thetas[3] = -2*PI + PI/2 -thetas[1] + r
+
+
+
+	thetas[4]= -PI/2      						# Default value Need to Change
+	'''
+
 
 """
 Function that calculates encoder numbers for each motor
@@ -133,49 +152,65 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	l09 = 0.0535
 	l10 = 0.059   # thickness of aluminum plate is around 0.006
 
-	xg = xwg + 0.1485
-	yg = ywg - 0.1485
-	zg = zwg - 0.013
+	xg = xwg + 0.149
+	yg = ywg - 0.149
+	zg = zwg - 0.0193
 
-	
+	print("****************\n****************\nGRIPPER LOCATION\n****************\n****************\n" + str((xg,yg,zg)) + "\n\n\n")
 
 	xcen = xg - l09*np.cos(yaw)
 	ycen = yg - l09*np.sin(yaw)
 	zcen = zg
 
 	# theta1
+	print("np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  : " + str(np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  ))
+	print("np.arctan2(ycen, xcen): " + str(np.arctan2(ycen, xcen)))
 	thetas[0] = np.arctan2(ycen, xcen) - np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))        # Default value Need to Change
-
+	print("Theta 1: " + str(thetas[0]))
+	
 	# theta6
-	thetas[5] = PI/2 + thetas[0] - yaw     # Default value Need to Change
- 	
+	# BAD CODE
+	# thetas[5] = PI/2 + thetas[0] - yaw     # Default value Need to Change
+ 	thetas[5] = PI - yaw - (PI/2 - thetas[0])
+ 	print("Theta 6: " + str(thetas[5]))
 	
 	x3end = (l06 + 0.027) * np.sin(thetas[0]) - l07 * np.cos(thetas[0]) + xcen
 	y3end = -(l06 + 0.027) * np.cos(thetas[0]) - l07 * np.sin(thetas[0]) + ycen
-	z3end = zcen + l08
+	z3end = zcen + l08 + l10
 
 	c = np.sqrt(x3end*x3end + y3end*y3end + (z3end - l01)*(z3end - l01))
+	
+
 	# helper variables
-	print(x3end)
-	print(y3end)
-	print(z3end)
-	print(xcen)
-	print(ycen)
-	print(zcen)
-	alpha = np.arccos((-c*c + l03*l03 + l05*l05)/(2*l03*l05))
-	beta =  np.arcsin(l05 / c * np.sin(alpha))
-	gamma = np.arcsin((z3end - l01) / c )
-	etta = PI - alpha - beta
-	delta = PI/2 - alpha 
-
-	thetas[1]= -(beta + gamma)     				# Default value Need to Change
-	thetas[2]= PI - alpha      					# Default value Need to Change
-	thetas[3]= -(etta + delta) + (0.5*PI) 		# Default value Need to Change, need + (0.5*PI) for compensation
-	thetas[4]= -PI/2      						# Default value Need to Change
+	print("X cen: " + str(xcen))
+	print("Y cen: " + str(ycen))
+	print("Z cen: " + str(zcen))
+	print("X3 end: " + str(x3end))
+	print("Y3 end: " + str(y3end))
+	print("Z3 end: " + str(z3end))
 
 
-	print(thetas)
-	print("theta1 to theta6: " + str(thetas) + "\n")
 
+	c = np.sqrt(  (x3end**2 + y3end**2) + (z3end - l01)**2)
+	
+	alpha = np.arccos((l03**2 + c**2 - l05**2) / (2*l03*c))
+	beta = np.arcsin((z3end - l01) / c)
+	gamma = np.arccos((l03**2 + l05**2 - c**2) / (2*l03*l05))
+
+	thetas[1] = -(alpha + beta) 				# Default value Need to Change
+	thetas[2] = PI - gamma						# Default value Need to Change
+	thetas[3] = -(thetas[2] + thetas[1] + PI/2) + PI/2   # need PI/2 for compensation
+	thetas[4]= -PI/2							# Default value Need to Change
+
+
+
+	print("Theta 2: " + str(thetas[1]))
+	print("Theta 3: " + str(thetas[2]))
+	print("Theta 4: " + str(thetas[3]))
+	print("Theta 5: " + str(thetas[4]))
+	
 	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), \
 		          float(thetas[3]), float(thetas[4]), float(thetas[5]) )
+
+
+
