@@ -59,26 +59,6 @@ def Get_MS():
 	# ==============================================================#
 	return M, S
 
-	'''
-	alpha = np.arccos((-c*c + l03*l03 + l05*l05)/(2*l03*l05))
-	beta =  np.arcsin(l05 / c * np.sin(alpha))
-	gamma = np.arcsin((z3end - l01) / c )
-	etta = PI - alpha - beta
-	delta = PI/2 - alpha 
-
-
-	thetas[1]= -(beta + gamma)     				# Default value Need to Change
-	thetas[2]= PI - alpha      					# Default value Need to Change
-	#thetas[3]= -(etta + delta) + (0.5*PI) 		# Default value Need to Change, need + (0.5*PI) for compensation
-	r = PI - thetas[2]
-	thetas[3] = -2*PI + PI/2 -thetas[1] + r
-
-
-
-	thetas[4]= -PI/2      						# Default value Need to Change
-	'''
-
-
 """
 Function that calculates encoder numbers for each motor
 """
@@ -169,7 +149,6 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	print("Theta 1: " + str(thetas[0]))
 	
 	# theta6
-	# BAD CODE
 	# thetas[5] = PI/2 + thetas[0] - yaw     # Default value Need to Change
  	thetas[5] = PI - yaw - (PI/2 - thetas[0])
  	print("Theta 6: " + str(thetas[5]))
@@ -190,27 +169,47 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	print("Z3 end: " + str(z3end))
 
 
-
-	c = np.sqrt(  (x3end**2 + y3end**2) + (z3end - l01)**2)
+	# some changes made, double check before demo
+	c = np.sqrt((x3end**2 + y3end**2) + (z3end - l01)**2)
 	
 	alpha = np.arccos((l03**2 + c**2 - l05**2) / (2*l03*c))
-	beta = np.arcsin((z3end - l01) / c)
-	gamma = np.arccos((l03**2 + l05**2 - c**2) / (2*l03*l05))
+	gamma = np.arcsin((z3end - l01) / c)
+	beta = np.arcsin((np.sin(alpha)*c)/l05)
 
-	thetas[1] = -(alpha + beta) 				# Default value Need to Change
-	thetas[2] = PI - gamma						# Default value Need to Change
-	thetas[3] = -(thetas[2] + thetas[1] + PI/2) + PI/2   # need PI/2 for compensation
+	thetas[1] = -(alpha + gamma) 				# Default value Need to Change
+	thetas[2] = PI - beta						# Default value Need to Change
+	thetas[3] = -(thetas[2] + thetas[1])        # need PI/2 for compensation
 	thetas[4]= -PI/2							# Default value Need to Change
-
-
 
 	print("Theta 2: " + str(thetas[1]))
 	print("Theta 3: " + str(thetas[2]))
 	print("Theta 4: " + str(thetas[3]))
 	print("Theta 5: " + str(thetas[4]))
 	
-	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), \
-		          float(thetas[3]), float(thetas[4]), float(thetas[5]) )
+	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), 
+					float(thetas[3]), float(thetas[4]), float(thetas[5]))
 
 
 
+	'''
+	alpha = np.arccos((-c*c + l03*l03 + l05*l05)/(2*l03*l05))
+	beta =  np.arcsin((l05 * np.sin(alpha)) / c ) 
+	gamma = np.arcsin((z3end - l01) / c )
+	etta = PI - alpha - beta
+	delta = PI/2 - alpha 
+
+
+	thetas[1]= -(beta + gamma)     				# Default value Need to Change
+	thetas[2]= PI - alpha      					# Default value Need to Change
+	#thetas[3]= -(etta + delta) + (0.5*PI) 		# Default value Need to Change, need + (0.5*PI) for compensation
+	^^^^^^^^^^ The expression for theta 4 doesn't make sense. 
+	
+	r = PI - thetas[2]
+	thetas[3] = -2*PI + PI/2 -thetas[1] + r
+
+
+
+	thetas[4]= -PI/2      						# Default value Need to Change
+	'''
+
+	
