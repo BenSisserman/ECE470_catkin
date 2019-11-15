@@ -13,8 +13,11 @@ def Get_MS():
 	# =================== Your code starts here ====================#
 	# Fill in the correct values for w1~6 and q1~6, as well as the M matrix
 	#M = np.eye(4)
+	x_offset = -0.149
+	y_offset = 0.149
+	z_offset = 0.0193
 
-	M = np.array([[0,-1,0,0.54], [0,0,-1,0.242], [1,0,0,0.212], [0,0,0,1]])
+	M = np.array([[0,-1,0,0.54 + x_offset], [0,0,-1,0.242 + y_offset], [1,0,0,0.212 + z_offset], [0,0,0,1]])
 	S = np.zeros((6,6))
 
 	w1 = np.array([0,0,1])
@@ -24,12 +27,12 @@ def Get_MS():
 	w5 = np.array([1,0,0])
 	w6 = np.array([0,1,0])
 
-	q1 = np.array([0,0,0])
-	q2 = np.array([0,0,0.152])
-	q3 = np.array([0.244,0,0.152])
-	q4 = np.array([0.457,0,0.152])
-	q5 = np.array([0,0.11,0.152])
-	q6 = np.array([0.54,0,0.152])
+	q1 = np.array([0 + x_offset			,0 + y_offset,		z_offset + 0])
+	q2 = np.array([0 + x_offset			,0 + y_offset,		z_offset + 0.152])
+	q3 = np.array([0.244 + x_offset		,0 + y_offset,		z_offset + 0.152])
+	q4 = np.array([0.457 + x_offset		,0 + y_offset,		z_offset + 0.152])
+	q5 = np.array([0 + x_offset			,0.11 + y_offset,	z_offset + 0.152])
+	q6 = np.array([0.54 + x_offset		,0 + y_offset,		z_offset + 0.152])
 
 	v1 = np.cross(-w1, q1)
 	v2 = np.cross(-w2, q2)
@@ -68,7 +71,7 @@ def lab_fk(theta1, theta2, theta3, theta4, theta5, theta6):
 	return_value = [None, None, None, None, None, None]
 
 	# =========== Implement joint angle to encoder expressions here ===========
-	print("Foward kinematics calculated:\n")
+	print("Forward kinematics calculated:\n")
 
 	# =================== Your code starts here ====================#
 	theta = np.array([theta1,theta2,theta3,theta4,theta5,theta6])
@@ -78,9 +81,11 @@ def lab_fk(theta1, theta2, theta3, theta4, theta5, theta6):
 
 	exp = []
 	for i in range(6):
+		'''
 		print(i)
 		print(S[i])
 		print(theta[i])
+		'''
 		exp.append(get_exp(S[i], theta[i]))
 
 	for i in range(6):
@@ -136,22 +141,22 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	yg = ywg - 0.149
 	zg = zwg - 0.0193
 
-	print("****************\n****************\nGRIPPER LOCATION\n****************\n****************\n" + str((xg,yg,zg)) + "\n\n\n")
+	#print("****************\n****************\nGRIPPER LOCATION\n****************\n****************\n" + str((xg,yg,zg)) + "\n\n\n")
 
 	xcen = xg - l09*np.cos(yaw)
 	ycen = yg - l09*np.sin(yaw)
 	zcen = zg
 
 	# theta1
-	print("np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  : " + str(np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  ))
-	print("np.arctan2(ycen, xcen): " + str(np.arctan2(ycen, xcen)))
+	#print("np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  : " + str(np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  ))
+	#print("np.arctan2(ycen, xcen): " + str(np.arctan2(ycen, xcen)))
 	thetas[0] = np.arctan2(ycen, xcen) - np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))        # Default value Need to Change
-	print("Theta 1: " + str(thetas[0]))
+	#print("Theta 1: " + str(thetas[0]))
 	
 	# theta6
 	# thetas[5] = PI/2 + thetas[0] - yaw     # Default value Need to Change
  	thetas[5] = PI - yaw - (PI/2 - thetas[0])
- 	print("Theta 6: " + str(thetas[5]))
+ 	#print("Theta 6: " + str(thetas[5]))
 	
 	x3end = (l06 + 0.027) * np.sin(thetas[0]) - l07 * np.cos(thetas[0]) + xcen
 	y3end = -(l06 + 0.027) * np.cos(thetas[0]) - l07 * np.sin(thetas[0]) + ycen
@@ -160,6 +165,7 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	c = np.sqrt(x3end*x3end + y3end*y3end + (z3end - l01)*(z3end - l01))
 	
 
+	'''
 	# helper variables
 	print("X cen: " + str(xcen))
 	print("Y cen: " + str(ycen))
@@ -167,7 +173,7 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	print("X3 end: " + str(x3end))
 	print("Y3 end: " + str(y3end))
 	print("Z3 end: " + str(z3end))
-
+	'''
 
 	# some changes made, double check before demo
 	c = np.sqrt((x3end**2 + y3end**2) + (z3end - l01)**2)
@@ -180,15 +186,14 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	thetas[2] = PI - beta						# Default value Need to Change
 	thetas[3] = -(thetas[2] + thetas[1])        # need PI/2 for compensation
 	thetas[4]= -PI/2							# Default value Need to Change
-
+	'''
 	print("Theta 2: " + str(thetas[1]))
 	print("Theta 3: " + str(thetas[2]))
 	print("Theta 4: " + str(thetas[3]))
 	print("Theta 5: " + str(thetas[4]))
-	
+	'''
 	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), 
 					float(thetas[3]), float(thetas[4]), float(thetas[5]))
-
 
 
 	'''
