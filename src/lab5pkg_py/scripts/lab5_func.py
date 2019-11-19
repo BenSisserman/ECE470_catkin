@@ -150,71 +150,35 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	# theta1
 	#print("np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  : " + str(np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))  ))
 	#print("np.arctan2(ycen, xcen): " + str(np.arctan2(ycen, xcen)))
+	
 	thetas[0] = np.arctan2(ycen, xcen) - np.arcsin((l02-l04+l06) / np.sqrt(xcen*xcen + ycen*ycen))        # Default value Need to Change
+	
 	#print("Theta 1: " + str(thetas[0]))
 	
 	# theta6
 	# thetas[5] = PI/2 + thetas[0] - yaw     # Default value Need to Change
- 	thetas[5] = PI - yaw - (PI/2 - thetas[0])
+ 	
+	thetas[5] = PI - yaw - (PI/2 - thetas[0])
+
  	#print("Theta 6: " + str(thetas[5]))
 	
 	x3end = (l06 + 0.027) * np.sin(thetas[0]) - l07 * np.cos(thetas[0]) + xcen
 	y3end = -(l06 + 0.027) * np.cos(thetas[0]) - l07 * np.sin(thetas[0]) + ycen
 	z3end = zcen + l08 + l10
 
-	c = np.sqrt(x3end*x3end + y3end*y3end + (z3end - l01)*(z3end - l01))
-	
-
-	'''
-	# helper variables
-	print("X cen: " + str(xcen))
-	print("Y cen: " + str(ycen))
-	print("Z cen: " + str(zcen))
-	print("X3 end: " + str(x3end))
-	print("Y3 end: " + str(y3end))
-	print("Z3 end: " + str(z3end))
-	'''
-
 	# some changes made, double check before demo
 	c = np.sqrt((x3end**2 + y3end**2) + (z3end - l01)**2)
-	
 	alpha = np.arccos((l03**2 + c**2 - l05**2) / (2*l03*c))
+	
 	gamma = np.arcsin((z3end - l01) / c)
+
 	beta = np.arcsin((np.sin(alpha)*c)/l05)
 
-	thetas[1] = -(alpha + gamma) 				# Default value Need to Change
-	thetas[2] = PI - beta						# Default value Need to Change
+	thetas[1] = -(alpha + gamma) 				
+	thetas[2] = PI - beta						
 	thetas[3] = -(thetas[2] + thetas[1])        # need PI/2 for compensation
-	thetas[4]= -PI/2							# Default value Need to Change
-	'''
-	print("Theta 2: " + str(thetas[1]))
-	print("Theta 3: " + str(thetas[2]))
-	print("Theta 4: " + str(thetas[3]))
-	print("Theta 5: " + str(thetas[4]))
-	'''
+	thetas[4]= -PI/2							
+
 	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), 
 					float(thetas[3]), float(thetas[4]), float(thetas[5]))
 
-
-	'''
-	alpha = np.arccos((-c*c + l03*l03 + l05*l05)/(2*l03*l05))
-	beta =  np.arcsin((l05 * np.sin(alpha)) / c ) 
-	gamma = np.arcsin((z3end - l01) / c )
-	etta = PI - alpha - beta
-	delta = PI/2 - alpha 
-
-
-	thetas[1]= -(beta + gamma)     				# Default value Need to Change
-	thetas[2]= PI - alpha      					# Default value Need to Change
-	#thetas[3]= -(etta + delta) + (0.5*PI) 		# Default value Need to Change, need + (0.5*PI) for compensation
-	^^^^^^^^^^ The expression for theta 4 doesn't make sense. 
-	
-	r = PI - thetas[2]
-	thetas[3] = -2*PI + PI/2 -thetas[1] + r
-
-
-
-	thetas[4]= -PI/2      						# Default value Need to Change
-	'''
-
-	
