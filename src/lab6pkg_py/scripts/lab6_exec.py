@@ -20,13 +20,21 @@ go_away = [270*PI/180.0, -90*PI/180.0, 90*PI/180.0, -90*PI/180.0, -90*PI/180.0, 
 xw_yw_R = []
 xw_yw_G = []
 
-red_block_target_location = []
-green_block_target_location = []
+red_block_target_location = [[0.14, -0.16, 0.10], [0.14, -0.10, 0.10]]
+green_block_target_location = [[0.26, -0.10, 0.10], [0.26, -0.16, 0.10]]
 
-num_red_in_stack = 0
-num_green_in_stack = 0
+green_pos_1 = np.radians([112.6, -52, 108.2, -148.6, -90, 44.6])
+green_pos_2 = np.radians([116.4, -57.5, 116.5, -149, -90, 44.6])
 
-BLOCK_HEIGHT = 0.032
+pink_pos_2 = np.radians([130, -43.5, 87.3, -134.5, -90, 41])
+pink_pos_1 = np.radians([125.1, -37.5, 73.8, -127.1, -90, 36.4])
+
+green_tar_pos = [green_pos_1, green_pos_2]
+pink_tar_pos = [pink_pos_1, pink_pos_2]
+
+
+num_red_collected = 0
+num_green_collected = 0
 
 # 20Hz
 SPIN_RATE = 20 
@@ -47,7 +55,7 @@ suction_off = False
 
 current_io_0 = False
 current_position_set = False
-
+suction = True
 """
 Whenever ur3/gripper_input publishes info this callback function is called.
 """
@@ -132,6 +140,22 @@ def gripper(pub_cmd, loop_rate, io_0):
 	return error
 
 """
+DONE: define a ROS topic callback funtion for getting the state of suction cup
+Whenever ur3/gripper_input publishes info this callback function is called.
+"""
+
+def gripper_callback(msg): 
+
+	global suction
+
+	# get data from msg
+
+	suction = msg.DIGIN 
+	suction = suction & 1
+
+
+
+"""
 Move robot arm from one position to another
 """
 def move_arm(pub_cmd, loop_rate, dest, vel, accel):
@@ -193,6 +217,7 @@ def main():
 	# each time data is published
 	sub_position = rospy.Subscriber('ur3/position', position, position_callback)
 	sub_input = rospy.Subscriber('ur3/gripper_input', gripper_input, input_callback)
+	sub_gripper = rospy.Subscriber('ur3/gripper_input',gripper_input, gripper_callback)
 
 
 	vel = 4.0
@@ -386,22 +411,59 @@ def move_arm(pub_cmd, loop_rate, dest, vel, accel):
 ################ Pre-defined parameters and functions no need to change above ################
 
 
-def move_block(pub_cmd, loop_rate, start_xw_yw_zw, target_xw_yw_zw, vel, accel):
+def move_block(pub_cmd, loop_rate, start_xw_yw_zw, end_pos, vel, accel):
 
-	"""
-	start_xw_yw_zw: where to pick up a block in global coordinates
-	target_xw_yw_zw: where to place the block in global coordinates
+	global suction
 
-	hint: you will use lab_invk(), gripper(), move_arm() functions to
-	pick and place a block 
+	error = 0	
 
-	"""
+	start_pos = lab_invk(start_xw_yw_zw[0], start_xw_yw_zw[1], start_xw_yw_zw[2], 0)
+	#print(start_pos)
+	
+	if(isinstance(start_pos, int)):
+		print("INVALID POSITION. IK CANNOT REACH CUBE AT POSITION " + str(start_xw_yw_zw) + ".\n")
+		return -1
+	
+	#print(start_xw_yw_zw)
+	#end_pos = #lab_invk(target_xw_yw_zw[0], target_xw_yw_zw[1], target_xw_yw_zw[2], 0)
+	home = np.radians([165, -90, 90, -90, -90, 0])
+	
+	# start at home
+	move_arm(pub_cmd, loop_rate, home, 5, 2)
 
-	# global variable1
-	# global variable2
+	time.sleep(.1)
+	
+	# move arm to block location
+	move_arm(pub_cmd, loop_rate, start_pos, vel, accel)
+	time.sleep(0.1)
 
-	error = 0
+	#turn gripper on
+	gripper(pub_cmd, loop_rate, 1)
+	time.sleep(0.3)
 
+	# suction cup feedback
+
+	if(not suction):
+		gripper(pub_cmd, loop_rate, 0)
+		move_arm(pub_cmd, loop_rate, home, vel, accel)
+		print("No block at src.")
+		error = 1
+		return error
+	
+	# move home to avoid knocking over blocks
+	move_arm(pub_cmd, loop_rate, home, vel, accel)
+	
+	# move to dest
+	move_arm(pub_cmd, loop_rate, end_pos, vel, accel)
+	time.sleep(0.1)
+	
+	# turn gripper off
+	gripper(pub_cmd, loop_rate, 0)
+
+
+	# end at home
+	move_arm(pub_cmd, loop_rate, home, vel, accel)
+	
 	return error
 
 
@@ -450,6 +512,7 @@ class ImageConverter:
 
 
 
+
 """
 Program run from here
 """
@@ -461,6 +524,10 @@ def main():
 	global go_away
 	global xw_yw_R
 	global xw_yw_G
+	global red_block_target_location
+	global green_block_target_location
+	global num_green_collected
+	global num_red_collected
 
 	# Initialize ROS node
 	rospy.init_node('lab6node')
@@ -494,19 +561,38 @@ def main():
 	need to call move_block(pub_command, loop_rate, start_xw_yw_zw, target_xw_yw_zw, vel, accel)
 	"""
 
-	'''
-	to do:
-		fix green (won't appeaer on right side of the grid)
-		define start/stop positions for stacking
-		define Z-val for size of a block
-		fuck shit up
-	'''
+
+	''' comment:
+	print("\nRed:" + str(xw_yw_R))
+
+	print("\nGreen:" + str(xw_yw_G))
+	end comment '''
 
 
+	green_locations = xw_yw_G
+	red_locations = xw_yw_R
 
 
+	# Green blocks
+	while(len(green_locations) != 0):
+		coords = green_locations.pop(0)
+		coords.append(0.04)
+
+		#print(coords)
+
+		move_block(pub_command, loop_rate, coords, green_tar_pos[num_green_collected], vel, accel)
+		
+		num_green_collected += 1
 
 
+	# Yellow blocks
+	while(len(red_locations) != 0):
+		coords = red_locations.pop(0)
+		coords.append(0.04)
+
+		move_block(pub_command, loop_rate, coords, pink_tar_pos[num_red_collected], vel, accel)
+		
+		num_red_collected += 1
 
 
 	# ================================= Student's code ends here =================================

@@ -16,12 +16,18 @@ from lab3_func import blob_search_init, blob_search
 ######################## Replace values below in Part2 of Lab3 ########################
 
 # Params for camera calibration
+
+''' OLD CODE
 theta = 0 
 beta = 750.266619276
 
 tx = -0.103716216216
 ty = -0.177833333333
-
+'''
+theta = 0
+beta = 730.0
+tx = -0.25051369863
+ty = -0.0618150684932
 
 #######################################################################################
 
@@ -61,7 +67,7 @@ class ImageConverter:
 		cv2.line(cv_image, (0,50), (640,50), (0,0,0), 5)
 
 		# cv_image is normal color image
-		blob_image_center = blob_search(cv_image, self.detector)
+		blob_image_center, green_center, pink_center = blob_search(cv_image, self.detector)
 
 		print(blob_image_center)
 

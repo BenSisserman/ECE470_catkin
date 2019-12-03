@@ -71,7 +71,7 @@ def lab_fk(theta1, theta2, theta3, theta4, theta5, theta6):
 	return_value = [None, None, None, None, None, None]
 
 	# =========== Implement joint angle to encoder expressions here ===========
-	print("Forward kinematics calculated:\n")
+	#print("Forward kinematics calculated:\n")
 
 	# =================== Your code starts here ====================#
 	theta = np.array([theta1,theta2,theta3,theta4,theta5,theta6])
@@ -92,12 +92,14 @@ def lab_fk(theta1, theta2, theta3, theta4, theta5, theta6):
 		T = T.dot(exp[i])
 	T = T.dot(M)
 	
-
+	# Check if invalid solution
+	if(T[2,3] < 0):
+		return -1 
 
 	# ==============================================================#
 	
-	print(str(T) + "\n")
-
+	#print(str(T) + "\n")
+	
 	return_value[0] = theta1 + PI
 	return_value[1] = theta2
 	return_value[2] = theta3
@@ -106,7 +108,6 @@ def lab_fk(theta1, theta2, theta3, theta4, theta5, theta6):
 	return_value[5] = theta6
 
 	return return_value
-
 
 def get_exp(S, theta):
 	w = [S[0], S[1], S[2]]
@@ -173,6 +174,6 @@ def lab_invk(xwg, ywg, zwg, yaw):
 	thetas[3] = -(thetas[2] + thetas[1])        # need PI/2 for compensation
 	thetas[4]= -PI/2							# Default value Need to Change
 
-	return lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), 
-					float(thetas[3]), float(thetas[4]), float(thetas[5]))
+	fk = lab_fk(float(thetas[0]), float(thetas[1]), float(thetas[2]), float(thetas[3]), float(thetas[4]), float(thetas[5]))
 
+	return fk

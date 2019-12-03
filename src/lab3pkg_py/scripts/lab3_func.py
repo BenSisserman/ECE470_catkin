@@ -20,14 +20,14 @@ def blob_search_init():
 
 	# Filter by Area.
 	params.filterByArea = True
-	params.minArea = 100
+	params.minArea = 200 #was 100
 	params.maxArea = 500
 
 
 	# Filter by Circularity
-	params.filterByCircularity = True
-	params.minCircularity = 0.15
-	params.maxCircularity = 1
+	params.filterByCircularity = True # was true
+	params.minCircularity = 0 # 0.15
+	params.maxCircularity = .77 # 1
 
 	# Filter by Inerita
 	params.filterByInertia = True
@@ -84,14 +84,17 @@ def blob_search(image, detector):
 
 	"""
 
-	upper = (30, 255,  255)
-	lower = (10,60,0)
+
+	# Orange HSV
+	upper_orange = (30, 255,  255)
+	lower_orange = (10,60,0)
 
 	############################# Your Code End Here #############################
 
 
 	# Define a mask using the lower and upper bounds of the orange color 
-	mask_image = cv2.inRange(hsv_image, lower, upper)
+	mask_image = cv2.inRange(hsv_image, lower_orange, upper_orange)
+
 
 	crop_top_row = 100
 	crop_bottom_row = 350
@@ -99,6 +102,7 @@ def blob_search(image, detector):
 	crop_bottom_col = 500
 
 	crop_image = mask_image[crop_top_row:crop_bottom_row, crop_top_col:crop_bottom_col]
+
 
 	blob_image_center = []
 
@@ -112,6 +116,8 @@ def blob_search(image, detector):
 
 	# Draw centers on each blob, append all the centers to blob_image_center as string in format "x y"
 
+
+	# ORANGE
 	keypoints = detector.detect(crop_image)
 	kp_list = []
 
@@ -135,15 +141,23 @@ def blob_search(image, detector):
 	# under that pixel location and see what the HSV values are for that color. 
 	image = cv2.circle(image, (int(crop_top_col), int(crop_top_row)), 3, (0, 0, 255), -1)
 	print('H,S,V at pixel ' + str(crop_top_row) + ' ' + str(crop_top_col) + ' ' + str(hsv_image[crop_top_row,crop_top_col]))	
-
+	
 	cv2.namedWindow("Maze Window")
 	cv2.imshow("Maze Window", im_with_keypoints)
-
+	'''
 	cv2.namedWindow("MaskImage Window")
 	cv2.imshow("MaskImage Window", mask_image)
+	
+	cv2.namedWindow("GREEN")
+	cv2.imshow("GREEN", green_mask)
+	
+	cv2.namedWindow("PINK")
+	cv2.imshow("PINK", pink_mask)
+	
 
 	cv2.namedWindow("Crop Window")
 	cv2.imshow("Crop Window", crop_image)
+	'''
 
 	cv2.waitKey(2)
 

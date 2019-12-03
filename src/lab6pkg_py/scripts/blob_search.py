@@ -6,15 +6,22 @@ import numpy as np
 # ============================= Student's code starts here ===================================
 
 # Params for camera calibration
-theta = 0 
+
+theta = 0
 beta = 740.0
-tx = -0.282094594595
-ty = -0.143581081081
+tx = -0.245662162162
+ty = -0.0609054054054
 
 
 # Function that converts image coord to world coord
 def IMG2W(x,y):
-	pass
+
+	#print('(x,y) = ' + str((x,y)))
+
+	xw = (x - 240)/beta - tx
+	yw = (y - 320)/beta - ty
+
+	return [xw,yw]
 
 """
 To init blob search params, will be init (called) in the ImageConverter class
@@ -33,22 +40,22 @@ def blob_search_init():
 
 	# Filter by Area.
 	params.filterByArea = True
-	params.minArea = 200 #was 100
-	params.maxArea = 500
+	params.minArea = 100 #was 100
+	params.maxArea = 800
 
 
 	# Filter by Circularity
-	params.filterByCircularity = True # was true
+	params.filterByCircularity = False # was true
 	params.minCircularity = 0 # 0.15
-	params.maxCircularity = .77 # 1
+	#params.maxCircularity = .77 # 1
 
 	# Filter by Inerita
-	params.filterByInertia = True
+	params.filterByInertia = False
 	params.minInertiaRatio = 0.15
 
 	
 	# Filter by Convexity
-	params.filterByConvexity = True
+	params.filterByConvexity = False
 	params.minConvexity = 0.15
 	
 	
@@ -82,12 +89,12 @@ def blob_search(image, color):
 	lower_green = (50, 150, 125)
 
 	#PIBK
-	upper_pink =  (15, 255, 255)
-	lower_pink =  ( 0, 200, 220)
+	upper_pink =  (50, 255, 255)
+	lower_pink =  (20, 100, 100)
 
 
 	# Orange HSV
-	upper_orange = (30, 255,  255)
+	upper_orange = (20, 255,  255)
 	lower_orange = (10,60,0)
 
 	############################# Your Code End Here #############################
@@ -102,9 +109,9 @@ def blob_search(image, color):
 
 
 	crop_top_row = 100
-	crop_bottom_row = 350
-	crop_top_col = 150
-	crop_bottom_col = 500
+	crop_bottom_row = 360
+	crop_top_col = 230
+	crop_bottom_col = 530
 
 	crop_image = mask_image[crop_top_row:crop_bottom_row, crop_top_col:crop_bottom_col]
 	green_crop_image = green_mask[crop_top_row:crop_bottom_row, crop_top_col:crop_bottom_col]
@@ -132,7 +139,7 @@ def blob_search(image, color):
 		x = keypoints[i].pt[0] + crop_top_col
 		y = keypoints[i].pt[1] + crop_top_row
 		new_tuple = (x, y)
-		print(new_tuple)
+		#print(new_tuple)
 		keypoints[i].pt = new_tuple
 		cv2.circle(image,(int(np.round(x)),int(np.round(y))), 1, (255, 255, 255), -1)
 		#print((int(np.round(x)),int(np.round(y))))
@@ -149,7 +156,7 @@ def blob_search(image, color):
 		x = keypoints[i].pt[0] + crop_top_col
 		y = keypoints[i].pt[1] + crop_top_row
 		new_tuple = (x, y)
-		print(new_tuple)
+		#print(new_tuple)
 		keypoints[i].pt = new_tuple
 		cv2.circle(im_with_keypoints,(int(np.round(x)),int(np.round(y))), 1, (255, 255, 255), -1)
 		#print((int(np.round(x)),int(np.round(y))))
@@ -166,7 +173,7 @@ def blob_search(image, color):
 		x = keypoints[i].pt[0] + crop_top_col
 		y = keypoints[i].pt[1] + crop_top_row
 		new_tuple = (x, y)
-		print(new_tuple)
+		#print(new_tuple)
 		keypoints[i].pt = new_tuple
 		cv2.circle(im_with_keypoints,(int(np.round(x)),int(np.round(y))), 1, (255, 255, 255), -1)
 		#print((int(np.round(x)),int(np.round(y))))
@@ -181,7 +188,7 @@ def blob_search(image, color):
 	# Draw small circle at pixel coordinate crop_top_col, crop_top_row so you can move a color
 	# under that pixel location and see what the HSV values are for that color. 
 	image = cv2.circle(image, (int(crop_top_col), int(crop_top_row)), 3, (0, 0, 255), -1)
-	print('H,S,V at pixel ' + str(crop_top_row) + ' ' + str(crop_top_col) + ' ' + str(hsv_image[crop_top_row,crop_top_col]))	
+	#print('H,S,V at pixel ' + str(crop_top_row) + ' ' + str(crop_top_col) + ' ' + str(hsv_image[crop_top_row,crop_top_col]))	
 	
 	cv2.namedWindow("Maze Window")
 	cv2.imshow("Maze Window", im_with_keypoints)
@@ -191,20 +198,33 @@ def blob_search(image, color):
 	
 	cv2.namedWindow("GREEN")
 	cv2.imshow("GREEN", green_mask)
-	
-	cv2.namedWindow("PINK")
-	cv2.imshow("PINK", pink_mask)
-	
 
 	cv2.namedWindow("Crop Window")
 	cv2.imshow("Crop Window", crop_image)
+
+
+	cv2.namedWindow("PINK")
+	cv2.imshow("PINK", pink_mask)
 	'''
 
 	cv2.waitKey(2)
 
+	pink_center_w = []
+	green_center_w = []
+
+	for Coord in pink_center:
+		coord = Coord.split(' ')
+		pink_center_w.append(IMG2W(int(coord[1]), int(coord[0])))
+
+	for Coord in green_center:
+		coord = Coord.split(' ')
+		green_center_w.append(IMG2W(int(coord[1]), int(coord[0])))
+
+
 	if(color == "red"):
-		return pink_center
+		return pink_center_w
 	elif(color == "green"):
-		return green_center
+		return green_center_w
+
 	return blob_image_center
 	
